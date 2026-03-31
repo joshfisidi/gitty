@@ -294,7 +294,7 @@ export function MovieConveyor({
               <div className="relative aspect-[2/3] rounded-xl overflow-hidden border border-border bg-card transition-all group-hover:border-primary group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] group-hover:scale-105">
                 {movie.poster_path ? (
                   <img
-                    src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
+                    src={movie.poster_path}
                     alt={movie.title}
                     className="w-full h-full object-cover"
                     loading="lazy"

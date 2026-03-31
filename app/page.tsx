@@ -7,10 +7,10 @@ import { FavoritesButton } from "@/components/favorites-button"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const STREAMS = [
-  { title: "Trending Movies", category: "movies" as const },
-  { title: "Trending TV Shows", category: "tv" as const },
-  { title: "Trending Animations", category: "animation" as const },
-  { title: "Trending Anime Series", category: "anime" as const },
+  { title: "Trending JavaScript", category: "movies" as const },
+  { title: "Trending TypeScript", category: "tv" as const },
+  { title: "Trending Python", category: "animation" as const },
+  { title: "Trending Rust", category: "anime" as const },
 ]
 
 const MovieConveyor = dynamic(
@@ -44,8 +44,8 @@ export default function HomePage() {
               <Image src="/logo.png" alt="Flickle logo" fill className="object-cover" priority />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Flickle</h1>
-              <p className="text-xs text-muted-foreground">Your Best Movie Vault</p>
+              <h1 className="text-xl font-bold text-foreground">Gitty</h1>
+              <p className="text-xs text-muted-foreground">Your GitHub Project Radar</p>
             </div>
           </div>
           <FavoritesButton />
@@ -57,11 +57,11 @@ export default function HomePage() {
         {/* Hero Section */}
         <div className="mb-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3 text-balance">
-            Your Best
-            <span className="text-primary"> Movie Vault</span>
+            Track the Best
+            <span className="text-primary"> GitHub Projects</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Search millions of movies, build your collection, and experience cinema like never before
+            Discover trending repos, save your stack, and open repos instantly
           </p>
         </div>
 

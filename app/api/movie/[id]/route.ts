@@ -1,32 +1,38 @@
-import { NextResponse } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const apiKey = process.env.TMDB_API_KEY
-  const { searchParams } = new URL(req.url)
-  const media = (searchParams.get("media") || "movie") as "movie" | "tv"
-
-  if (!apiKey) {
-    return NextResponse.json({ error: "TMDb API key not configured" }, { status: 500 })
-  }
+  const repoId = id
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || ""
 
   try {
-    const endpoint = media === "tv" ? "tv" : "movie"
-    const res = await fetch(
-      `https://api.themoviedb.org/3/${endpoint}/${id}?api_key=${apiKey}&append_to_response=credits,videos,watch/providers`
-    )
+    const res = await fetch(`https://api.github.com/repositories/${repoId}`, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    })
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch movie details")
-    }
+    if (!res.ok) throw new Error(`Repo details failed: ${res.status}`)
+    const repo = await res.json()
 
-    const data = await res.json()
-    return NextResponse.json(data)
+    const links = [
+      { provider_name: "Repo", url: repo.html_url },
+      { provider_name: "Owner", url: repo.owner?.html_url },
+      { provider_name: "Issues", url: `${repo.html_url}/issues` },
+      ...(repo.homepage ? [{ provider_name: "Homepage", url: repo.homepage }] : []),
+    ].filter((x) => !!x.url)
+
+    return NextResponse.json({
+      "watch/providers": {
+        results: {
+          CA: { flatrate: links },
+          US: { flatrate: links },
+        },
+      },
+    })
   } catch (error) {
-    console.error("TMDb movie details error:", error)
-    return NextResponse.json({ error: "Failed to fetch movie details" }, { status: 500 })
+    console.error("Repo details error:", error)
+    return NextResponse.json({ error: "Failed to fetch repository details" }, { status: 500 })
   }
 }

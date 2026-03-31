@@ -27,7 +27,7 @@ export default function FavoritesPage() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Favorites</h1>
+              <h1 className="text-xl font-bold text-foreground">Saved Repos</h1>
               <p className="text-xs text-muted-foreground">
                 {favorites.length} {favorites.length === 1 ? "title" : "titles"} saved
               </p>

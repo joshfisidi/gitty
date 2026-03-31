@@ -22,31 +22,6 @@ type WatchProvider = {
   url: string
 }
 
-const PROVIDER_LINKS: Array<{ match: string[]; url: string }> = [
-  { match: ["netflix"], url: "https://www.netflix.com" },
-  { match: ["disney+", "disney plus", "disney plus"], url: "https://www.disneyplus.com" },
-  { match: ["prime video", "amazon prime"], url: "https://www.primevideo.com" },
-  { match: ["apple tv", "apple tv+", "apple tv plus"], url: "https://tv.apple.com" },
-  { match: ["hulu"], url: "https://www.hulu.com" },
-  { match: ["max", "hbo max"], url: "https://www.max.com" },
-  { match: ["crave"], url: "https://www.crave.ca" },
-  { match: ["paramount+", "paramount plus"], url: "https://www.paramountplus.com" },
-  { match: ["peacock"], url: "https://www.peacocktv.com" },
-  { match: ["youtube"], url: "https://www.youtube.com" },
-  { match: ["tubi"], url: "https://tubitv.com" },
-  { match: ["pluto"], url: "https://pluto.tv" },
-  { match: ["mubi"], url: "https://mubi.com" },
-  { match: ["criterion"], url: "https://www.criterionchannel.com" },
-  { match: ["crunchyroll"], url: "https://www.crunchyroll.com" },
-]
-
-function getProviderLink(name: string) {
-  const normalized = name.toLowerCase()
-  const found = PROVIDER_LINKS.find((item) => item.match.some((m) => normalized.includes(m)))
-  if (found) return found.url
-  return `https://www.google.com/search?q=${encodeURIComponent(`${name} app`)}`
-}
-
 export function SwiperCards({ movies }: SwiperCardsProps) {
   const { removeFavorite, setSelectedMovie, openModal } = useMovies()
   const [activeIndex, setActiveIndex] = useState(0)
@@ -88,20 +63,22 @@ export function SwiperCards({ movies }: SwiperCardsProps) {
             if (!res.ok) return
             const data = await res.json()
             const providers = data?.["watch/providers"]?.results?.CA || data?.["watch/providers"]?.results?.US
-            const names = [
+            const links = [
               ...(providers?.flatrate || []),
               ...(providers?.free || []),
               ...(providers?.ads || []),
               ...(providers?.rent || []),
               ...(providers?.buy || []),
             ]
-              .map((p: any) => p?.provider_name)
-              .filter(Boolean) as string[]
+              .map((p: any) => ({
+                name: p?.provider_name,
+                url: p?.url,
+              }))
+              .filter((p: WatchProvider) => Boolean(p.name && p.url)) as WatchProvider[]
 
-            const uniqueNames = Array.from(new Set(names)).slice(0, 5)
-            const linked = uniqueNames.map((name) => ({ name, url: getProviderLink(name) }))
+            const deduped = Array.from(new Map(links.map((p) => [p.name, p])).values()).slice(0, 5)
 
-            if (linked.length) next[movie.id] = linked
+            if (deduped.length) next[movie.id] = deduped
           } catch {
             // ignore per-card provider failures
           }
@@ -122,9 +99,9 @@ export function SwiperCards({ movies }: SwiperCardsProps) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center px-6">
         <Heart className="h-16 w-16 text-muted-foreground mb-4" />
-        <h3 className="text-xl font-semibold text-foreground mb-2">No Favorites Yet</h3>
+        <h3 className="text-xl font-semibold text-foreground mb-2">No Saved Repos Yet</h3>
         <p className="text-muted-foreground">
-          Search for movies and add them to your collection
+          Search for GitHub projects and save them to your collection
         </p>
       </div>
     )
@@ -149,7 +126,7 @@ export function SwiperCards({ movies }: SwiperCardsProps) {
               >
                 {movie.poster_path ? (
                   <img
-                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                    src={movie.poster_path}
                     alt={movie.title}
                     className="w-full h-full object-cover"
                   />

@@ -109,7 +109,7 @@ export function Search() {
             onBlur={() => {
               window.setTimeout(() => setShowSuggestions(false), 120)
             }}
-            placeholder="Search movies..."
+            placeholder="Search GitHub projects..."
             className="h-14 rounded-2xl border-border bg-card pl-12 pr-12 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
           />
           {query && (
@@ -136,7 +136,7 @@ export function Search() {
                 >
                   {movie.poster_path ? (
                     <img
-                      src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
+                      src={movie.poster_path}
                       alt={movie.title}
                       className="h-10 w-7 rounded object-cover"
                     />
@@ -173,7 +173,7 @@ export function Search() {
             >
               {movie.poster_path ? (
                 <img
-                  src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
+                  src={movie.poster_path}
                   alt={movie.title}
                   className="h-24 w-16 rounded-lg object-cover"
                 />

@@ -36,7 +36,7 @@ export function MovieDetail() {
           {selectedMovie.backdrop_path && (
             <div className="relative h-56 md:h-72 overflow-hidden">
               <img
-                src={`https://image.tmdb.org/t/p/w1280${selectedMovie.backdrop_path}`}
+                src={selectedMovie.backdrop_path}
                 alt={selectedMovie.title}
                 className="w-full h-full object-cover"
               />

@@ -43,7 +43,7 @@ export function FavoritesButton() {
         type="button"
         variant="outline"
         size="icon"
-        title="Backup favorites to iCloud Files"
+        title="Backup saved repos"
         onClick={exportFavoritesBackup}
         className="rounded-xl"
       >
@@ -54,7 +54,7 @@ export function FavoritesButton() {
         type="button"
         variant="outline"
         size="icon"
-        title="Restore favorites backup"
+        title="Restore saved repos backup"
         onClick={() => fileInputRef.current?.click()}
         className="rounded-xl"
       >
