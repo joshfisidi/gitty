@@ -27,6 +27,9 @@ export function MovieConveyor({
   const [isInViewport, setIsInViewport] = useState(true)
   const [page, setPage] = useState(1)
   const BATCH_PAGES = 5 // ~100 items at 20/page
+  const BASE_SPEED = 0.02 // px/ms
+  const MAX_SWIPE_VELOCITY = 2.2 // px/ms
+  const INERTIA_DECAY = 0.985
   const conveyorRootRef = useRef<HTMLDivElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number | null>(null)
@@ -126,13 +129,17 @@ export function MovieConveyor({
       lastTimeRef.current = timestamp
 
       if (isInViewport && !isHoveredRef.current && !isTouchInteractingRef.current && timestamp >= pauseUntilRef.current) {
-        const baseSpeed = 0.03 // px per ms
+        // decay user fling velocity slowly so momentum carries like a film strip
+        userVelocityRef.current *= INERTIA_DECAY
+        if (Math.abs(userVelocityRef.current) < 0.005) userVelocityRef.current = 0
 
-        // decay any user fling velocity (from swipe), preserving momentum briefly
-        userVelocityRef.current *= 0.94
-        if (Math.abs(userVelocityRef.current) < 0.01) userVelocityRef.current = 0
+        // let strong swipe momentum override belt auto speed
+        const effectiveSpeed =
+          Math.abs(userVelocityRef.current) > 0.03
+            ? userVelocityRef.current
+            : BASE_SPEED + userVelocityRef.current
 
-        scrollPositionRef.current += delta * (baseSpeed + userVelocityRef.current)
+        scrollPositionRef.current += delta * effectiveSpeed
 
         // keep in positive range for seamless loop
         const loopWidth = totalWidth / 2
@@ -192,7 +199,7 @@ export function MovieConveyor({
     dragStartXRef.current = clientX
     dragLastXRef.current = clientX
     dragLastTimeRef.current = performance.now()
-    userVelocityRef.current = 0
+    // don't hard-reset velocity: repeated flicks can compound speed naturally
   }
 
   const moveDrag = (clientX: number) => {
@@ -208,9 +215,10 @@ export function MovieConveyor({
     // invert for natural horizontal swipe behavior
     scrollPositionRef.current -= dx
 
-    // convert to px/ms velocity and clamp for controlled acceleration
-    const instantVelocity = (-dx / dt)
-    userVelocityRef.current = Math.max(-0.6, Math.min(0.6, instantVelocity))
+    // convert to px/ms velocity, boost, and accumulate so repeated swipes accelerate flow
+    const instantVelocity = (-dx / dt) * 1.35
+    const nextVelocity = userVelocityRef.current * 0.55 + instantVelocity
+    userVelocityRef.current = Math.max(-MAX_SWIPE_VELOCITY, Math.min(MAX_SWIPE_VELOCITY, nextVelocity))
 
     dragLastXRef.current = clientX
     dragLastTimeRef.current = now
