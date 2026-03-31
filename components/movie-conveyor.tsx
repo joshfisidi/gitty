@@ -46,6 +46,7 @@ export function MovieConveyor({
   const isHoveredRef = useRef(false)
   const isTouchInteractingRef = useRef(false)
   const pauseUntilRef = useRef(0)
+  const swipeOverrideUntilRef = useRef(0)
   const { addFavorite, removeFavorite, isFavorite } = useMovies()
 
   const fetchMovies = useCallback(async (pageNum: number) => {
@@ -133,9 +134,11 @@ export function MovieConveyor({
         userVelocityRef.current *= INERTIA_DECAY
         if (Math.abs(userVelocityRef.current) < 0.005) userVelocityRef.current = 0
 
-        // let strong swipe momentum override belt auto speed
-        const effectiveSpeed =
-          Math.abs(userVelocityRef.current) > 0.03
+        // explicit swipe override window: belt base speed is fully disabled
+        const inSwipeOverride = timestamp < swipeOverrideUntilRef.current
+        const effectiveSpeed = inSwipeOverride
+          ? userVelocityRef.current
+          : Math.abs(userVelocityRef.current) > 0.03
             ? userVelocityRef.current
             : BASE_SPEED + userVelocityRef.current
 
@@ -219,6 +222,7 @@ export function MovieConveyor({
     const instantVelocity = (-dx / dt) * 1.35
     const nextVelocity = userVelocityRef.current * 0.55 + instantVelocity
     userVelocityRef.current = Math.max(-MAX_SWIPE_VELOCITY, Math.min(MAX_SWIPE_VELOCITY, nextVelocity))
+    swipeOverrideUntilRef.current = performance.now() + 2400
 
     dragLastXRef.current = clientX
     dragLastTimeRef.current = now
@@ -261,7 +265,9 @@ export function MovieConveyor({
       <div 
         className="overflow-hidden relative touch-pan-y select-none"
         onPointerDown={(e) => {
-          isTouchInteractingRef.current = true
+          if (e.pointerType === "touch" || e.pointerType === "pen") {
+            isTouchInteractingRef.current = true
+          }
           startDrag(e.clientX)
         }}
         onPointerMove={(e) => moveDrag(e.clientX)}
