@@ -7,6 +7,15 @@ const LANGUAGE_BY_CATEGORY: Record<string, string> = {
   anime: "rust",
 }
 
+function cutoffDate(window: string) {
+  const now = new Date()
+  const d = new Date(now)
+  if (window === "day") d.setDate(now.getDate() - 1)
+  else if (window === "month") d.setDate(now.getDate() - 30)
+  else d.setDate(now.getDate() - 7)
+  return d.toISOString().slice(0, 10)
+}
+
 function mapRepo(item: any) {
   return {
     id: item.id,
@@ -31,11 +40,14 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const page = searchParams.get("page") || "1"
   const category = (searchParams.get("category") || "movies").toLowerCase()
-  const language = LANGUAGE_BY_CATEGORY[category] || "javascript"
+  const language = (searchParams.get("language") || LANGUAGE_BY_CATEGORY[category] || "javascript").toLowerCase()
+  const topic = (searchParams.get("topic") || "ai").toLowerCase()
+  const window = (searchParams.get("window") || "week").toLowerCase()
 
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || ""
 
-  const q = `language:${language} stars:>100 pushed:>2025-01-01`
+  const pushedAfter = cutoffDate(window)
+  const q = `language:${language} topic:${topic} stars:>100 pushed:>${pushedAfter}`
   const endpoint = `https://api.github.com/search/repositories?q=${encodeURIComponent(q)}&sort=stars&order=desc&per_page=20&page=${page}`
 
   try {

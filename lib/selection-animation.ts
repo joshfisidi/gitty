@@ -22,7 +22,7 @@ export function runSelectionPathAnimation(sourceEl: HTMLElement, targetSelector 
   ghost.style.zIndex = "9999"
   ghost.style.borderRadius = "12px"
   ghost.style.objectFit = "cover"
-  ghost.style.boxShadow = "0 16px 40px rgba(0,0,0,0.45), 0 0 24px rgba(212,175,55,0.35)"
+  ghost.style.boxShadow = "0 16px 40px rgba(0,0,0,0.45), 0 0 24px rgba(59,130,246,0.45)"
   ghost.style.transformOrigin = "center center"
 
   document.body.appendChild(ghost)
@@ -57,9 +57,9 @@ export function runSelectionPathAnimation(sourceEl: HTMLElement, targetSelector 
   animate(targetEl, {
     scale: [1, 1.12, 1],
     boxShadow: [
-      "0 0 0 rgba(212,175,55,0)",
-      "0 0 34px rgba(212,175,55,0.5)",
-      "0 0 0 rgba(212,175,55,0)",
+      "0 0 0 rgba(59,130,246,0)",
+      "0 0 34px rgba(59,130,246,0.55)",
+      "0 0 0 rgba(59,130,246,0)",
     ],
     duration: 520,
     delay: 320,

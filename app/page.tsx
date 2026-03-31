@@ -2,16 +2,17 @@
 
 import Image from "next/image"
 import dynamic from "next/dynamic"
+import { useState } from "react"
 import { Search } from "@/components/search"
 import { FavoritesButton } from "@/components/favorites-button"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const STREAMS = [
-  { title: "Trending JavaScript", category: "movies" as const },
-  { title: "Trending TypeScript", category: "tv" as const },
-  { title: "Trending Python", category: "animation" as const },
-  { title: "Trending Rust", category: "anime" as const },
+  { title: "Trending Projects", category: "movies" as const },
 ]
+
+const LANGUAGES = ["javascript", "typescript", "python", "rust", "go", "java"]
+const TOPICS = ["ai", "web", "developer-tools", "cli", "blockchain", "automation"]
 
 const MovieConveyor = dynamic(
   () => import("@/components/movie-conveyor").then((m) => m.MovieConveyor),
@@ -34,6 +35,10 @@ const MovieConveyor = dynamic(
 )
 
 export default function HomePage() {
+  const [language, setLanguage] = useState("javascript")
+  const [topic, setTopic] = useState("ai")
+  const [window, setWindow] = useState<"day" | "week" | "month">("week")
+
   return (
     <main className="min-h-screen bg-background">
       {/* Header */}
@@ -70,13 +75,51 @@ export default function HomePage() {
           <Search />
         </div>
 
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="h-10 rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          >
+            {LANGUAGES.map((l) => (
+              <option key={l} value={l}>{l}</option>
+            ))}
+          </select>
+
+          <select
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            className="h-10 rounded-xl border border-border bg-card px-3 text-sm text-foreground"
+          >
+            {TOPICS.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+
+          <div className="inline-flex rounded-xl border border-border bg-card p-1">
+            {(["day", "week", "month"] as const).map((w) => (
+              <button
+                key={w}
+                type="button"
+                onClick={() => setWindow(w)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium ${window === w ? "bg-primary text-primary-foreground" : "text-foreground/80 hover:bg-secondary"}`}
+              >
+                {w}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Streaming rails */}
         <div className="space-y-10">
           {STREAMS.map((stream) => (
             <MovieConveyor
-              key={stream.category}
+              key={`${stream.category}-${language}-${topic}-${window}`}
               title={stream.title}
               category={stream.category}
+              language={language}
+              topic={topic}
+              window={window}
             />
           ))}
         </div>

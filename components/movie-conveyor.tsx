@@ -10,11 +10,17 @@ import type { Movie } from "@/lib/types"
 type MovieConveyorProps = {
   title?: string
   category?: "movies" | "tv" | "animation" | "anime"
+  language?: string
+  topic?: string
+  window?: "day" | "week" | "month"
 }
 
 export function MovieConveyor({
   title = "Now Streaming",
   category = "movies",
+  language,
+  topic,
+  window = "week",
 }: MovieConveyorProps) {
   const [movies, setMovies] = useState<Movie[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -40,14 +46,18 @@ export function MovieConveyor({
 
   const fetchMovies = useCallback(async (pageNum: number) => {
     try {
-      const res = await fetch(`/api/trending?page=${pageNum}&category=${category}`)
+      const qs = new URLSearchParams({ page: String(pageNum), category, window })
+      if (language) qs.set("language", language)
+      if (topic) qs.set("topic", topic)
+
+      const res = await fetch(`/api/trending?${qs.toString()}`)
       const data = await res.json()
       return Array.isArray(data) ? data : []
     } catch (error) {
       console.error("Failed to fetch movies:", error)
       return []
     }
-  }, [category])
+  }, [category, language, topic, window])
 
   const fetchBatch = useCallback(async (startPage: number, pages = BATCH_PAGES) => {
     const pageNums = Array.from({ length: pages }, (_, i) => startPage + i)
@@ -307,9 +317,9 @@ export function MovieConveyor({
 
                 {isFavorite(movie.id) ? (
                   <div className="absolute top-2 left-2 z-20">
-                    <span className="inline-flex items-center gap-1 rounded-md border border-amber-200/60 bg-amber-400/95 px-2 py-0.5">
-                      <Star className="h-3 w-3 fill-black/80 text-black/80" />
-                      <span className="text-[10px] font-bold uppercase tracking-wide text-black/85">Saved</span>
+                    <span className="inline-flex items-center gap-1 rounded-md border border-primary/40 bg-primary/90 px-2 py-0.5">
+                      <Star className="h-3 w-3 fill-primary-foreground text-primary-foreground" />
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-primary-foreground">Saved</span>
                     </span>
                   </div>
                 ) : null}
