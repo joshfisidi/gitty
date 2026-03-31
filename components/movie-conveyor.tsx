@@ -42,6 +42,7 @@ export function MovieConveyor({
   const hasMoreRef = useRef(true)
   const isHoveredRef = useRef(false)
   const isTouchInteractingRef = useRef(false)
+  const pauseUntilRef = useRef(0)
   const { addFavorite, removeFavorite, isFavorite } = useMovies()
 
   const fetchMovies = useCallback(async (pageNum: number) => {
@@ -124,7 +125,7 @@ export function MovieConveyor({
       const delta = timestamp - lastTimeRef.current
       lastTimeRef.current = timestamp
 
-      if (isInViewport && !isHoveredRef.current && !isTouchInteractingRef.current) {
+      if (isInViewport && !isHoveredRef.current && !isTouchInteractingRef.current && timestamp >= pauseUntilRef.current) {
         const baseSpeed = 0.03 // px per ms
 
         // decay any user fling velocity (from swipe), preserving momentum briefly
@@ -167,6 +168,9 @@ export function MovieConveyor({
   }, [isLoading, movies.length, isInViewport, fetchNextPage])
 
   const handleMovieClick = (movie: Movie, el: HTMLElement) => {
+    // On mobile tap, pause belt briefly so selection feels intentional
+    pauseUntilRef.current = performance.now() + 900
+
     if (isFavorite(movie.id)) return
 
     addFavorite(movie)
